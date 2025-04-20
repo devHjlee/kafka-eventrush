@@ -198,6 +198,37 @@ public class EventJoinConsumer {
 
 ---
 
+### K6 js
+```js
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export let options = {
+  vus: 100, // 동시 사용자 수
+  duration: '10s', // 10초 동안 요청
+};
+
+export default function () {
+  const userId = Math.floor(Math.random() * 10000); // 중복 방지
+  const url = `http://localhost:8080/api/event/join`;
+
+  const payload = JSON.stringify({ userId: userId });
+  const params = {
+    headers: { 'Content-Type': 'application/json' },
+  };
+
+  let res = http.post(url, payload, params);
+
+  check(res, {
+    'status is 200/409/429': (r) => [200, 409, 429].includes(r.status),
+  });
+
+  sleep(0.1);
+}
+```
+
+---
+
 ## Redis 위치별 장단점
 
 ### Producer 측 Redis 사용
